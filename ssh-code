@@ -1,0 +1,93 @@
+# Create an instance with desired configuration . Open the ssh and continue with the coding.
+
+sudo apt-get update && sudo apt-get upgrade
+
+
+# Install Matrix synapse
+
+sudo apt-get install curl wget gnupg2 apt-transport-https -y
+
+sudo wget -O /usr/share/keyrings/matrix-org-archive-keyring.gpg https://packages.matrix.org/debian/matrix-org-archive-keyring.gpg
+
+echo "deb [signed-by=/usr/share/keyrings/matrix-org-archive-keyring.gpg] https://packages.matrix.org/debian/ $(lsb_release -cs) main" |
+    sudo tee /etc/apt/sources.list.d/matrix-org.list
+    
+ sudo apt-get update -y
+ sudo apt-get install matrix-synapse-py3 -y
+ 
+ # mention the name of your server and then click on yes to continue
+ 
+ # start the Matrix service and enable it to start at system reboot with the following command
+ 
+ sudo systemctl start matrix-synapse
+ sudo systemctl enable matrix-synapse
+ 
+ # default port is 8008, you can check it by 
+ 
+ sudo ss -tunelp | grep 8008
+ 
+ # Configuration of matrix synapse
+sudo cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1
+
+# Copy the above output id
+
+sudo nano /etc/matrix-synapse/homeserver.yaml
+
+# Now under listener section , add the following
+
+enable_registration: false
+registration_shared_secret: "<Copied-id>"
+
+#save and close the file
+
+sudo systemctl restart matrix-synapse
+
+
+# Create new matrix user
+
+sudo register_new_matrix_user -c /etc/matrix-synapse/homeserver.yaml http://localhost:8008
+
+#You will be asked to set a username and password
+# you can enter admin as username and password
+
+
+#Configuration of ngnix
+
+sudo apt-get install nginx -y
+
+sudo nano /etc/nginx/sites-available/matrix.conf
+# Now add the following lines
+
+
+server {
+listen 80;
+server_name <name-of-your-server>;
+location / {
+proxy_pass http://localhost:8008;
+proxy_set_header X-Forwarded-For $remote_addr;
+}
+}
+
+#save and exit 
+
+sudo ln -s /etc/nginx/sites-available/matrix.conf /etc/nginx/sites-enabled/
+
+
+# Verify ngnix
+
+sudo nginx -t
+
+
+#now restart it
+
+sudo systemctl restart nginx
+
+sudo nano /etc/nginx/nginx.conf
+
+#Add the following line below http {:
+
+server_names_hash_bucket_size 64;
+
+# Now save and restart ngnix
+
+sudo systemctl restart nginx
