@@ -1,0 +1,15 @@
+# For further configuration, go to Cloud Dns 
+
+# click on add zones
+
+# fill the configuration and under ip section, paste the external ip of your instance
+
+# click on ok
+
+# Now under it, click on add Record set
+
+# select type, add extension like www, blog etc , and paste the same ip, and click on ok
+
+#click on registrar set, copy the name servers and configure it to your domain
+
+# now visit your domain , and MATRIX Synapse is running on that...
